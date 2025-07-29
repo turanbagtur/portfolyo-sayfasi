@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Panel | Solderet</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #0f0f0f; color: #fff; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 8px; border: 1px solid #333; }
+    th { background: #1e1e1e; }
+    tr:nth-child(even) { background: #141414; }
+    button { margin: 0 4px; padding: 4px 8px; }
+    input, textarea { width: 100%; background: #222; color: #fff; border: none; border-radius: 4px; padding: 4px; }
+  </style>
+</head>
+<body>
+
+  <h1>🛠️ Admin Panel</h1>
+  <p><button onclick="loadEntries()">Yenile</button></p>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Ad Soyad</th><th>E-posta</th><th>Mesaj</th><th>Tarih</th><th>İşlem</th></tr>
+    </thead>
+    <tbody id="entries"></tbody>
+  </table>
+
+  <script>
+    function loadEntries() {
+      // İki farklı anahtar kontrolü ekliyoruz, önceden başka isimle kaydettiyseniz de alır
+      let entries = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+      if (entries.length === 0 && localStorage.getItem('messages')) {
+        entries = JSON.parse(localStorage.getItem('messages'));
+      }
+
+      const tbody = document.getElementById('entries');
+      tbody.innerHTML = '';
+      entries.forEach((e,i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i+1}</td>
+          <td><input value="${e.name}" /></td>
+          <td><input value="${e.email}" /></td>
+          <td><textarea rows="2">${e.message}</textarea></td>
+          <td>${e.date || ''}</td>
+          <td>
+            <button onclick="saveEntry(${i})">Kaydet</button>
+            <button onclick="deleteEntry(${i})">Sil</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function saveEntry(index) {
+      const row = document.getElementById('entries').children[index];
+      const inputs = row.querySelectorAll('input, textarea');
+      const entries = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+      entries[index] = {
+        name: inputs[0].value,
+        email: inputs[1].value,
+        message: inputs[2].value,
+        date: entries[index].date || new Date().toLocaleString()
+      };
+      localStorage.setItem('contactMessages', JSON.stringify(entries));
+      alert('Kaydedildi!');
+      loadEntries();
+    }
+
+    function deleteEntry(index) {
+      if (!confirm('Bu kaydı silmek istediğinize emin misiniz?')) return;
+      const entries = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+      entries.splice(index,1);
+      localStorage.setItem('contactMessages', JSON.stringify(entries));
+      loadEntries();
+    }
+
+    // İlk yükleme
+    loadEntries();
+  </script>
+
+</body>
+</html>
